@@ -22,6 +22,10 @@
         {
             background-color: white;            
         }
+
+        .data-table td th{
+          color: black;
+        }
     </style>
 </head>
 <body>

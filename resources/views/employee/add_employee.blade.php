@@ -7,6 +7,12 @@
     <title>Employee</title>
     <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
+    
+    <Style>
+        .form-control {
+           color: black;
+         }
+   </Style>
 </head>
 <body>
     
@@ -25,16 +31,16 @@
                 @csrf
                 <div class="form-group">
                     <label for="name">Name</label>
-                    <input type="text" class="form-control" name="name" id="name" placeholder="Enter  name">
+                    <input type="text" class="form-control" name="name" id="name" placeholder="Enter  name" required>
                 </div>
                 <div class="form-group">
                     <label for="designation">Designation</label>
-                    <input type="text" class="form-control" name="designation" id="designation" placeholder="Enter  Designation">
+                    <input type="text" class="form-control" name="designation" id="designation" placeholder="Enter  Designation" required>
                 </div>
 
                 <div class="form-group">
                     <label for="department">Department</label>
-                    <input type="text" class="form-control" name="department" id="department" placeholder="Enter  Department">
+                    <input type="text" class="form-control" name="department" id="department" placeholder="Enter  Department" required>
                 </div>
 
                 <button type="submit" class="btn btn-primary">Submit</button>

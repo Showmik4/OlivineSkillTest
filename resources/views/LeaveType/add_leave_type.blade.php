@@ -7,6 +7,12 @@
     <title>Document</title>
     <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
+    
+    <Style>
+        .form-control {
+           color: black;
+   }
+   </Style>
 </head>
 <body>
     
@@ -34,7 +40,7 @@
                 </div>
                 <div class="form-group">
                     <label for="max_leave_taken">Maximum Leave Taken</label>
-                    <input type="text" class="form-control" name="max_leave" id="max_leave" required placeholder="Enter  Maximum Leave Taken">
+                    <input type="text" class="form-control" name="max_leave" id="max_leave" required placeholder="Enter  Maximum Leave Taken" required>
                 </div>
 
                 <button type="submit" class="btn btn-primary">Submit</button>

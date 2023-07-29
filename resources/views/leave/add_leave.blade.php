@@ -8,6 +8,12 @@
     <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">   
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+    <Style>
+         .form-control {
+            color: black;
+    }
+    </Style>
 </head>
 <body>
     
@@ -27,7 +33,7 @@
                 @csrf
                 <div class="form-group">
                     <label for="name">Employee Name</label>
-                    <select class="form-control" name="employee_id" id="name">
+                    <select class="form-control" name="employee_id" id="name" required>
                         <option value="">Select an Employee</option>
                         @foreach ($employee as $data)
                         <option value="{{ $data->id }}">{{ $data->name }}</option>
@@ -37,12 +43,12 @@
 
                 <div class="form-group">
                     <label for="total_leave_taken">In Total Leave Taken</label>
-                    <input type="text" class="form-control" name="intotal_leave_taken" id="intotal_leave_taken">
+                    <input type="text" class="form-control" name="intotal_leave_taken" id="intotal_leave_taken" readonly>
                 </div>
 
                 <div class="form-group">
                     <label for="name">Leave Type</label>
-                    <select class="form-control" name="leave_type_id" id="leave_type">
+                    <select class="form-control" name="leave_type_id" id="leave_type" required>
                         <option value="">Select a leave type</option>
                         @foreach ($leave_types as $data)
                         <option value="{{ $data->id }}">{{ $data->type }}</option>
@@ -52,7 +58,7 @@
                 
                 <div class="form-group">
                     <label for="total_leave_taken">Max Leave Taken</label>
-                    <input type="text" class="form-control" name="max_leave_taken" id="max_leave_taken">
+                    <input type="text" class="form-control" name="max_leave_taken" id="max_leave_taken" readonly>
                 </div>
                 
                 <div class="form-group">
