@@ -96,7 +96,7 @@
                     <td>{{ $leave->employee->name }}</td>
                     <td>{{ $leave->employee->department }}</td>
                     <td>{{ $leave->employee->designation}}</td>
-                    <td>{{ $leave->leaveType->name }}</td>
+                    <td>{{ $leave->leaveType->type }}</td>
                     <td>{{ $leave->start_date }}</td>
                     <td>{{ $leave->end_date }}</td>
                     <td>{{ $leave->total_leave_taken }}</td>

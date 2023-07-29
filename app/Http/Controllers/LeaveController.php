@@ -40,9 +40,8 @@ class LeaveController extends Controller
     {
             $leave = new  Leave();   
            
-             // Get the duration value from the date range picker
-            $duration = $request->input('duration');
-            // Parse the dates using Carbon directly
+             
+            $duration = $request->input('duration');          
             $dates = explode(' - ', $duration);
             $startDate = Carbon::createFromFormat('Y-m-d', trim($dates[0]));
             $endDate = Carbon::createFromFormat('Y-m-d', trim($dates[1]));
@@ -51,11 +50,10 @@ class LeaveController extends Controller
             $leave->leave_type_id = $request->leave_type_id;
             $leave->start_date = $startDate->format('Y-m-d');
             $leave->end_date = $endDate->format('Y-m-d');
-            $totalLeaveTaken = $endDate->diffInDays($startDate) + 1; // Add 1 to include the start date itself as a leave day
+            $totalLeaveTaken = $endDate->diffInDays($startDate) + 1; 
             $leave->total_leave_taken = $totalLeaveTaken;
             $leave->save();
-
-            // Update the total_leave_taken value for the employee              
+                         
             $employee = Employee::find($request->employee_id);
             $employee->intotal_leave_taken += $totalLeaveTaken;
             $employee->save();
@@ -70,54 +68,63 @@ class LeaveController extends Controller
             return view('leave.view_leave', compact('employees'));
         }
 
-        public function generateMonthlyLeaveReport(Request $request)
+        function generateMonthlyLeaveReport(Request $request)
         {
-            $request->validate([
-                'employee_id' => 'required|exists:employees,id',
-                'selected_month' => 'required|date_format:Y-m', // The date format should be 'YYYY-MM'
-            ]);
-        
             $employeeId = $request->input('employee_id');
-            $selectedMonth = Carbon::createFromFormat('Y-m', $request->input('selected_month'));
-        
-            // Fetch the individual employee's leave data for the selected month
+            $selectedMonth = Carbon::createFromFormat('Y-m', $request->input('selected_month'));       
+           
             $employeeLeave = Leave::with('leaveType', 'employee')
-                ->where('employee_id', $employeeId)
-                ->where('start_date', '>=', $selectedMonth->firstOfMonth()->format('Y-m-d'))
-                ->where('start_date', '<=', $selectedMonth->lastOfMonth()->format('Y-m-d'))
-                ->get();
-        
-            // Render the PDF view manually
-            $html = view('pdf.monthly_leave_report', compact('employeeLeave', 'selectedMonth'))->render();
-        
-            // Generate the PDF using Dompdf
-            $pdf = new Dompdf();
-            $pdf->loadHtml($html);
-        
-            // Optional: Set additional configuration for the PDF
-            // $pdf->setPaper('A4', 'landscape');
-        
-            // Render the PDF to output
-            $pdf->render();
-        
-            // Return the PDF for previewing in the browser
-            return $pdf->stream('monthly_leave_report_' . $selectedMonth->format('F_Y') . '.pdf');
+            ->where('employee_id', $employeeId)
+            ->where('start_date', '>=', $selectedMonth->firstOfMonth()->format('Y-m-d'))
+            ->where('start_date', '<=', $selectedMonth->lastOfMonth()->format('Y-m-d'))
+            ->get();
+           
+            $dompdf = new Dompdf();
+            $html = view('pdf.monthly_leave_report', compact('employeeLeave', 'selectedMonth'),
+            [
+                'mode'                 => 'utf-8',
+                'format'               => 'A4-P',
+                'default_font_size'    => '12',
+                'default_font'         => 'FreeSerif',
+                'margin_left'          => 5,
+                'margin_right'         => 5,
+                'margin_top'           => 5,
+                'margin_bottom'        => 5,
+                'margin_header'        => 0,
+                'margin_footer'        => 10,
+                'orientation'          => 'P',
+                'title'                => 'Laravel mPDF',
+                'author'               => '',
+                'watermark'            => '',
+                'show_watermark'       => false,
+                'watermark_font'       => 'sans-serif',
+                'display_mode'         => 'fullpage',
+                'watermark_text_alpha' => 0.1,
+                'custom_font_dir'      => '',
+                'custom_font_data' 	   => [],
+                'auto_language_detection'  => false,
+                'temp_dir'               => rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR),
+                'pdfa' 			=> false,
+                'pdfaauto' 		=> false,
+            ]); 
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
+    
+            return $dompdf->stream('output.pdf', ['Attachment' => false]);
         }
 
-
-  
-
-            public function getTotalLeaveTaken($id)
-            {             
-                 echo json_encode(DB::table('employees')
-                ->where('id', $id)->get()); 
-            }
+        public function getTotalLeaveTaken($id)
+        {             
+                echo json_encode(DB::table('employees')
+            ->where('id', $id)->get()); 
+        }
 
             
-            public function getMaxLeaveTaken($id)
-            {             
-                 echo json_encode(DB::table('leave_types')
-                ->where('id', $id)->get()); 
-            }
+        public function getMaxLeaveTaken($id)
+        {             
+                echo json_encode(DB::table('leave_types')
+            ->where('id', $id)->get()); 
+        }
 
 }

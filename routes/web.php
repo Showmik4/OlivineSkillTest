@@ -22,6 +22,7 @@ Route::post('/store_leave_type', [LeaveTypeController::class, 'store_leave_type'
 
 Route::get('/create_employee', [EmployeeController::class, 'create_employee'])->name('create_employee');
 Route::post('/store_employee', [EmployeeController::class, 'store_employee'])->name('store_employee');
+Route::get('/view_employee', [EmployeeController::class, 'index'])->name('view_employee');
 
 Route::get('/view_leave', [LeaveController::class, 'view_leave'])->name('view_leave');
 Route::get('/create_leave', [LeaveController::class, 'create_leave'])->name('create_leave');

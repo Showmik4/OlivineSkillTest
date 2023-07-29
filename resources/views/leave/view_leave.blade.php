@@ -17,7 +17,7 @@
     <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
 
     <style>
-        /* Custom CSS to set the background color */
+        
         body 
         {
             background-color: white;            
