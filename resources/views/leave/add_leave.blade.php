@@ -42,11 +42,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="total_leave_taken">In Total Leave Taken</label>
-                    <input type="text" class="form-control" name="intotal_leave_taken" id="intotal_leave_taken" readonly>
-                </div>
-
-                <div class="form-group">
                     <label for="name">Leave Type</label>
                     <select class="form-control" name="leave_type_id" id="leave_type" required>
                         <option value="">Select a leave type</option>
@@ -54,13 +49,8 @@
                         <option value="{{ $data->id }}">{{ $data->type }}</option>
                         @endforeach                        
                     </select>
-                </div> 
-                
-                <div class="form-group">
-                    <label for="total_leave_taken">Max Leave Taken</label>
-                    <input type="text" class="form-control" name="max_leave_taken" id="max_leave_taken" readonly>
-                </div>
-                
+                </div>                
+               
                 <div class="form-group">
                     <label for="daterange">Select Leave Dates</label>
                     <input type="text" class="form-control" name="duration" id="daterange" placeholder="Select leave dates">
@@ -72,13 +62,10 @@
     </div>
 </div>
 
-
 <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-
-
 
 
 <script type="text/javascript">  
@@ -89,68 +76,8 @@
             locale: {
                 format: 'YYYY-MM-DD',
             },
-        });
-
-       
-        function calculateDateDuration(startDate, endDate) {
-            const start = moment(startDate, 'YYYY-MM-DD');
-            const end = moment(endDate, 'YYYY-MM-DD');
-            return end.diff(start, 'days') + 1; 
-        }
-
-       
-        $('#leave_form').on('submit', function(event) {
-           
-            let startDate = $('#daterange').data('daterangepicker').startDate.format('YYYY-MM-DD');
-            let endDate = $('#daterange').data('daterangepicker').endDate.format('YYYY-MM-DD');            
-            let duration = calculateDateDuration(startDate, endDate);           
-            let intotalLeaveTaken = parseFloat($('#intotal_leave_taken').val());           
-            let totalLeaveTaken = intotalLeaveTaken + duration;            
-            let maxLeave = parseFloat($('#max_leave_taken').val());           
-            if (totalLeaveTaken > maxLeave) {
-                
-                $('#error_message').text('Total Leave Taken exceeds Max Leave. Please select a shorter duration.');
-                $('#error_message').show();
-
-                
-                event.preventDefault();
-            } else {
-               
-                $('#error_message').hide();
-            }
-        });
-
-      
-        $('#name').change(function() {
-            let id = $(this).val();
-            $('#intotal_leave_taken').empty();
-            $.ajax({
-                type: 'GET',
-                url: 'get_intotal_leave_taken/' + id,
-                success: function(response) {
-                    var response = JSON.parse(response);
-                    response.forEach(element => {
-                        $('#intotal_leave_taken').val(element['intotal_leave_taken']);
-                    });
-                }
-            });
-        });
-
-       
-        $('#leave_type').change(function() {
-            let id = $(this).val();
-            $('#max_leave_taken').empty();
-            $.ajax({
-                type: 'GET',
-                url: 'get_max_leave_taken/' + id,
-                success: function(response) {
-                    var response = JSON.parse(response);
-                    response.forEach(element => {
-                        $('#max_leave_taken').val(element['max_leave']);
-                    });
-                }
-            });
-        });
+        });      
+   
     });
 </script>
 </body>

@@ -94,12 +94,17 @@
               {data: 'employee_name', name: 'employee_name'},
               {data: 'designation', name: 'designation'}, 
               {data: 'department', name: 'department'}, 
-                {data: 'leave_type', name: 'leave_type'}, 
+            {data: 'leave_type', name: 'leave_type'}, 
               {data: 'start_date', name: 'start_date'}, 
               {data: 'end_date', name: 'end_date'},
               {data: 'total_leave_taken', name: 'total_leave_taken'},                     
              
-            ]
+            ],
+
+            "language": {
+              "search": "_INPUT_", // Placeholder for the search input
+              "searchPlaceholder": "Search records...", // Placeholder text
+          }
       });
       
     });

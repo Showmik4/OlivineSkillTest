@@ -33,16 +33,15 @@
                     <label for="type">Type</label>
                     <select name="type" class="form-control" id="type" required>
                         <option value="">Select Leave Type</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="semi-annual">Semi Annual</option>
-                        <option value="annual">Annual</option>                        
+                        <option value="Sick Leave">Sick Leave</option>
+                        <option value="Casual">Casual</option>
+                        <option value="Others">Others</option>                        
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="max_leave_taken">Maximum Leave Taken</label>
                     <input type="text" class="form-control" name="max_leave" id="max_leave" required placeholder="Enter  Maximum Leave Taken" required>
                 </div>
-
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
         </div>

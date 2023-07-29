@@ -17,8 +17,7 @@ class CreateEmployeesTable extends Migration
             $table->id();
             $table->string('name')->nullable();
             $table->string('department')->nullable();
-            $table->string('designation')->nullable();   
-            $table->integer('intotal_leave_taken')->default(0);          
+            $table->string('designation')->nullable();                     
             $table->timestamps();
         });
     }

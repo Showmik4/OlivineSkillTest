@@ -19,6 +19,7 @@ class CreateLeavesTable extends Migration
             $table->integer('leave_type_id')->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
+            $table->year('year')->nullable();
             $table->integer('total_leave_taken')->nullable();
             $table->timestamps();
         });

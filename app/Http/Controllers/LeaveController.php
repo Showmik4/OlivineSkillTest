@@ -20,6 +20,20 @@ class LeaveController extends Controller
            $data=Leave::select('employees.name as employee_name','employees.designation as designation','employees.department as department','leave_types.type as leave_type', 'leaves.*')
                 ->join('employees', 'employees.id', '=', 'leaves.employee_id')
                 ->join('leave_types', 'leave_types.id', '=', 'leaves.leave_type_id');
+
+             // If the user entered a search query, apply the search filter
+            if ($request->has('search') && !empty($request->search['value'])) {
+                $searchValue = $request->search['value'];
+                $data->where(function($query) use ($searchValue) {
+                    $query->where('employees.name', 'like', "%{$searchValue}%")
+                        ->orWhere('employees.designation', 'like', "%{$searchValue}%")
+                        ->orWhere('employees.department', 'like', "%{$searchValue}%")
+                        ->orWhere('leave_types.type', 'like', "%{$searchValue}%")
+                        ->orWhere('start_date', 'like', "%{$searchValue}%")
+                        ->orWhere('end_date', 'like', "%{$searchValue}%")
+                        ->orWhere('total_leave_taken', 'like', "%{$searchValue}%");
+                });
+            }            
             return DataTables::of($data)
             ->addIndexColumn()          
             ->make(true);        
@@ -38,29 +52,90 @@ class LeaveController extends Controller
 
     public function store_leave(Request $request)
     {
-            $leave = new  Leave();   
+        $employeeId = $request->employee_id;
+        $leaveTypeId = $request->leave_type_id; 
+        $currentYear = date('Y'); // Get the current year  
+       
+        $duration = $request->input('duration');
+        $dates = explode(' - ', $duration);
+        $startDate = Carbon::createFromFormat('Y-m-d', trim($dates[0]));
+        $endDate = Carbon::createFromFormat('Y-m-d', trim($dates[1]));
+        $totalLeaveTaken = $endDate->diffInDays($startDate) + 1;
+
+       $leaveType = DB::table('leave_types')
+        ->where('id', $leaveTypeId)
+        ->select('max_leave')
+        ->first();
+
+        if (!$leaveType) {
+            return redirect()->back()->with('message', 'Invalid Leave Type.');
+        }
+
+        $maxLeaveAllowed = $leaveType->max_leave;
+
+       
+        $totalLeaveTakenByType = Leave::where('employee_id', $employeeId)
+            ->where('leave_type_id', $leaveTypeId)
+            ->whereYear('start_date', $currentYear)
+            ->sum('total_leave_taken');     
+                   
+        $newTotalLeaveTaken = $totalLeaveTakenByType + $totalLeaveTaken;
+
+        if ($newTotalLeaveTaken > $maxLeaveAllowed) {
+            return redirect()->back()->with('message', 'Total Leave Taken exceeds Max Leave. Please select a shorter duration.');
+        }      
            
-             
-            $duration = $request->input('duration');          
-            $dates = explode(' - ', $duration);
-            $startDate = Carbon::createFromFormat('Y-m-d', trim($dates[0]));
-            $endDate = Carbon::createFromFormat('Y-m-d', trim($dates[1]));
+   
+    $overlappingLeaves = Leave::where('employee_id', $employeeId)
+        ->whereYear('start_date', $currentYear)
+        ->where(function ($query) use ($startDate, $endDate) {
+            $query->where(function ($subQuery) use ($startDate, $endDate) {
+                $subQuery->where('start_date', '>=', $startDate)
+                    ->where('start_date', '<=', $endDate);
+            })->orWhere(function ($subQuery) use ($startDate, $endDate) {
+                $subQuery->where('end_date', '>=', $startDate)
+                    ->where('end_date', '<=', $endDate);
+            })->orWhere(function ($subQuery) use ($startDate, $endDate) {
+                $subQuery->where('start_date', '<=', $startDate)
+                    ->where('end_date', '>=', $endDate);
+            })->orWhere(function ($subQuery) use ($startDate, $endDate) {
+                $subQuery->where('start_date', '<=', $startDate)
+                    ->where('end_date', '>=', $startDate)
+                    ->where('end_date', '<=', $endDate);
+            })->orWhere(function ($subQuery) use ($startDate, $endDate) {
+                $subQuery->where('start_date', '>=', $startDate)
+                    ->where('start_date', '<=', $endDate)
+                    ->where('end_date', '>=', $endDate);
+            });
+        })
+        ->exists();
 
-            $leave->employee_id = $request->employee_id;
-            $leave->leave_type_id = $request->leave_type_id;
-            $leave->start_date = $startDate->format('Y-m-d');
-            $leave->end_date = $endDate->format('Y-m-d');
-            $totalLeaveTaken = $endDate->diffInDays($startDate) + 1; 
-            $leave->total_leave_taken = $totalLeaveTaken;
-            $leave->save();
-                         
-            $employee = Employee::find($request->employee_id);
-            $employee->intotal_leave_taken += $totalLeaveTaken;
-            $employee->save();
+            if ($overlappingLeaves) {
+                return redirect()->back()->with('message', 'Leave overlaps with existing leaves for the same employee. Please select a different date range.');
+            }
 
-            return redirect()->back()->with('message','Leave Added Successfully');
+            // Check for leaves with the same start and end dates in the same year
+        $duplicateLeaves = Leave::where('employee_id', $employeeId)
+        ->where('start_date', $startDate->format('Y-m-d'))
+        ->where('end_date', $endDate->format('Y-m-d'))
+        ->whereYear('start_date', $currentYear)
+        ->exists();
+
+        if ($duplicateLeaves) {
+            return redirect()->back()->with('message', 'Leave with the same date already exists for the same employee in the current year.');
+        }
+           
+        $leave = new Leave();
+        $leave->employee_id = $employeeId;
+        $leave->leave_type_id = $leaveTypeId;
+        $leave->start_date = $startDate->format('Y-m-d');
+        $leave->end_date = $endDate->format('Y-m-d');
+        $totalLeaveTaken = $endDate->diffInDays($startDate) + 1; 
+        $leave->total_leave_taken = $totalLeaveTaken;
+        $leave->year=$currentYear;
+        $leave->save();  
+        return redirect()->back()->with('message','Leave Added Successfully');
     }
-
 
     public function selectEmployeeAndMonth()
         {
@@ -109,22 +184,8 @@ class LeaveController extends Controller
             ]); 
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'portrait');
-            $dompdf->render();
-    
+            $dompdf->render();    
             return $dompdf->stream('output.pdf', ['Attachment' => false]);
-        }
-
-        public function getTotalLeaveTaken($id)
-        {             
-                echo json_encode(DB::table('employees')
-            ->where('id', $id)->get()); 
-        }
-
-            
-        public function getMaxLeaveTaken($id)
-        {             
-                echo json_encode(DB::table('leave_types')
-            ->where('id', $id)->get()); 
         }
 
 }

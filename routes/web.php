@@ -27,13 +27,7 @@ Route::get('/view_employee', [EmployeeController::class, 'index'])->name('view_e
 Route::get('/view_leave', [LeaveController::class, 'view_leave'])->name('view_leave');
 Route::get('/create_leave', [LeaveController::class, 'create_leave'])->name('create_leave');
 Route::post('/store_leave', [LeaveController::class, 'store_leave'])->name('store_leave');
-Route::get('/get_intotal_leave_taken/{id}', [LeaveController::class, 'getTotalLeaveTaken']);
-Route::get('/get_max_leave_taken/{id}', [LeaveController::class, 'getMaxLeaveTaken']);
 
-// Route::get('/select_employee_month', 'LeaveController@selectEmployeeAndMonth')->name('select_employee_month');
-// Route::get('/generate_monthly_leave_report', 'LeaveController@generateMonthlyLeaveReport')->name('generate_monthly_leave_report');
 Route::get('/select_employee_month', [LeaveController::class, 'selectEmployeeAndMonth'])->name('select_employee_month');
 Route::get('/generate_monthly_leave_report', [LeaveController::class, 'generateMonthlyLeaveReport'])->name('generate_monthly_leave_report');
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+
